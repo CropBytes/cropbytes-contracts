@@ -8,6 +8,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "verify:ropsten": "truffle run verify --network ropsten CropBytes && truffle run verify --network ropsten CropBytesVesting",
+    "deploy:ropsten": "truffle  migrate --network ropsten CropBytes && npm run verify:mainnet",
     "verify:mainnet": "truffle run verify --network eth CropBytes && truffle run verify --network eth CropBytesVesting",
     "deploy:mainnet": "truffle  migrate --network eth CropBytes && npm run verify:mainnet"
   },
