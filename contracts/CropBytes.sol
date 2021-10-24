@@ -12,7 +12,7 @@ import "openzeppelin-solidity/contracts/utils/Address.sol";
 import "openzeppelin-solidity/contracts/access/Ownable.sol";
 
 
-contract CorpBytes is Ownable, ERC20Pausable {
+contract CropBytes is Ownable, ERC20Pausable {
   // IEO	Swap 	Foundation	Product 	Marketing	Team 	Advisor	Mining
     
   /**

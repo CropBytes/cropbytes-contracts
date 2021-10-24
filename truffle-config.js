@@ -1,5 +1,7 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider')
+require('dotenv').config();
 const mnemonic = process.env.MNEMONIC;
+
 require('dotenv').config()
 module.exports = {
   plugins: ['truffle-plugin-verify'],
@@ -83,5 +85,16 @@ module.exports = {
 
   db: {
     enabled: false
+  },
+  compilers: {
+    solc: {
+      version: '0.8.0',
+      settings: {
+        optimizer: {
+          enabled: true, // Default: false
+          runs: 800      // Default: 200
+        },
+      }
+    }
   }
 };

@@ -1,6 +1,5 @@
 
 
-
 const cropbytes = artifacts.require("CropBytes");
 const cropbytesVesting = artifacts.require("CropBytesVesting");
 module.exports = async(deployer) =>{
