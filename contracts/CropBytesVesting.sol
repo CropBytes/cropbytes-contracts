@@ -1,7 +1,6 @@
-
 // contracts/TokenVesting.sol
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.0;
+pragma solidity 0.8.0;
 
 import "openzeppelin-solidity/contracts/token/ERC20/IERC20.sol";
 import "openzeppelin-solidity/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -167,6 +166,7 @@ contract CropBytesVesting is Ownable, ReentrancyGuard{
         require(_duration > 0, "TokenVesting: duration must be > 0");
         require(_amount > 0, "TokenVesting: amount must be > 0");
         require(_slicePeriodSeconds >= 1, "TokenVesting: slicePeriodSeconds must be >= 1");
+        require(_start >= now, "TokenVesting: Vesting start time cannot be in the past");
         bytes32 vestingScheduleId = this.computeNextVestingScheduleIdForHolder(_beneficiary);
         uint256 cliff = _start.add(_cliff);
         vestingSchedules[vestingScheduleId] = VestingSchedule(
@@ -198,7 +198,8 @@ contract CropBytesVesting is Ownable, ReentrancyGuard{
         onlyIfVestingScheduleNotRevoked(vestingScheduleId){
         VestingSchedule storage vestingSchedule = vestingSchedules[vestingScheduleId];
         require(vestingSchedule.revocable == true, "TokenVesting: vesting is not revocable");
-        uint256 vestedAmount = _computeReleasableAmount(vestingSchedule);
+        (uint256 vestedAmount,string memory errorMessage) = _computeReleasableAmount(vestingSchedule);
+        require(vestedAmount>0,errorMessage);
         if(vestedAmount > 0){
             release(vestingScheduleId, vestedAmount);
         }
@@ -238,7 +239,8 @@ contract CropBytesVesting is Ownable, ReentrancyGuard{
             isBeneficiary || isOwner,
             "TokenVesting: only beneficiary and owner can release vested tokens"
         );
-        uint256 vestedAmount = _computeReleasableAmount(vestingSchedule);
+        (uint256 vestedAmount,string memory errorMessage) = _computeReleasableAmount(vestingSchedule);
+        require( vestedAmount >0 , errorMessage );
         require(vestedAmount >= amount, "TokenVesting: cannot release tokens, not enough vested tokens");
         vestingSchedule.released = vestingSchedule.released.add(amount);
         address payable beneficiaryPayable = payable(vestingSchedule.beneficiary);
@@ -265,7 +267,7 @@ contract CropBytesVesting is Ownable, ReentrancyGuard{
         public
         onlyIfVestingScheduleNotRevoked(vestingScheduleId)
         view
-        returns(uint256){
+        returns(uint256,string memory){
         VestingSchedule storage vestingSchedule = vestingSchedules[vestingScheduleId];
         return _computeReleasableAmount(vestingSchedule);
     }
@@ -329,20 +331,22 @@ contract CropBytesVesting is Ownable, ReentrancyGuard{
     function _computeReleasableAmount(VestingSchedule memory vestingSchedule)
     internal
     view
-    returns(uint256){
+    returns(uint256,string memory){
         uint256 currentTime = getCurrentTime();
         if ((currentTime < vestingSchedule.cliff) || vestingSchedule.revoked == true) {
-            return 0;
+            return (0,"We cannot release the funds before the duration. Or there are no vestedfunds.");
         } else if (currentTime >= vestingSchedule.start.add(vestingSchedule.duration)) {
-            return vestingSchedule.amountTotal.sub(vestingSchedule.released);
+            return (vestingSchedule.amountTotal.sub(vestingSchedule.released),"");
         } else {
             uint256 timeFromStart = currentTime.sub(vestingSchedule.start);
             uint secondsPerSlice = vestingSchedule.slicePeriodSeconds;
+              //it is computing the time from start and dividing the seconds lapsed from starting time
             uint256 vestedSlicePeriods = timeFromStart.div(secondsPerSlice);
+             //This is giving the total number of seconds lapsed and divide the amount.
             uint256 vestedSeconds = vestedSlicePeriods.mul(secondsPerSlice);
             uint256 vestedAmount = vestingSchedule.amountTotal.mul(vestedSeconds).div(vestingSchedule.duration);
             vestedAmount = vestedAmount.sub(vestingSchedule.released);
-            return vestedAmount;
+            return (vestedAmount,"");
         }
     }
 
