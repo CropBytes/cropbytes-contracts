@@ -166,7 +166,7 @@ contract CropBytesVesting is Ownable, ReentrancyGuard{
         require(_duration > 0, "TokenVesting: duration must be > 0");
         require(_amount > 0, "TokenVesting: amount must be > 0");
         require(_slicePeriodSeconds >= 1, "TokenVesting: slicePeriodSeconds must be >= 1");
-        require(_start >= now, "TokenVesting: Vesting start time cannot be in the past");
+        require(_start >= block.timestamp, "TokenVesting: Vesting start time cannot be in the past");
         bytes32 vestingScheduleId = this.computeNextVestingScheduleIdForHolder(_beneficiary);
         uint256 cliff = _start.add(_cliff);
         vestingSchedules[vestingScheduleId] = VestingSchedule(
