@@ -12,7 +12,7 @@ contract MockTokenVesting is CropBytesVesting{
 
     uint256 mockTime = 0;
 
-    constructor(address token_) TokenVesting(token_){
+    constructor(address token_) CropBytesVesting(token_){
     }
 
     function setCurrentTime(uint256 _time)
