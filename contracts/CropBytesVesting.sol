@@ -340,7 +340,9 @@ contract CropBytesVesting is Ownable, ReentrancyGuard{
         } else {
             uint256 timeFromStart = currentTime.sub(vestingSchedule.start);
             uint secondsPerSlice = vestingSchedule.slicePeriodSeconds;
+              //it is computing the time from start and dividing the seconds lapsed from starting time
             uint256 vestedSlicePeriods = timeFromStart.div(secondsPerSlice);
+             //This is giving the total number of seconds lapsed and divide the amount.
             uint256 vestedSeconds = vestedSlicePeriods.mul(secondsPerSlice);
             uint256 vestedAmount = vestingSchedule.amountTotal.mul(vestedSeconds).div(vestingSchedule.duration);
             vestedAmount = vestedAmount.sub(vestingSchedule.released);
